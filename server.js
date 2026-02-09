@@ -18,15 +18,16 @@ app.post("/generate-pdf", async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-    "--no-sandbox",
-    "--disable-setuid-sandbox",
-    "--disable-dev-shm-usage",
-    "--disable-gpu",
-    "--no-zygote",
-    "--single-process"
-    ]
+      headless: true,
+      executablePath: puppeteer.executablePath(),
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--no-zygote",
+        "--single-process"
+      ]
     });
 
     const page = await browser.newPage();
@@ -54,13 +55,13 @@ app.post("/generate-pdf", async (req, res) => {
 
     res.send(pdfBuffer);
   } catch (err) {
-  console.error("PDF GENERATION ERROR 👇");
-  console.error(err);
+    console.error("PDF GENERATION ERROR 👇");
+    console.error(err);
 
-  res.status(500).json({
-    error: err.message || "Unknown PDF error"
-  });
-}
+    res.status(500).json({
+      error: err.message || "Unknown PDF error"
+    });
+  }
 });
 
 app.listen(PORT, () => {
