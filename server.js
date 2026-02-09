@@ -1,6 +1,5 @@
 const express = require("express");
-const puppeteer = require("puppeteer");
-const path = require("path");
+const { chromium } = require("playwright");
 const { generateHTML } = require("./templates/pdfTemplate");
 
 const app = express();
@@ -17,23 +16,19 @@ app.post("/generate-pdf", async (req, res) => {
   }
 
   try {
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: puppeteer.executablePath(),
+    const browser = await chromium.launch({
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--no-zygote",
-        "--single-process"
+        "--disable-dev-shm-usage"
       ]
     });
 
-    const page = await browser.newPage();
-    const html = generateHTML(mcqText);
+    const context = await browser.newContext();
+    const page = await context.newPage();
 
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    const html = generateHTML(mcqText);
+    await page.setContent(html, { waitUntil: "networkidle" });
 
     const pdfBuffer = await page.pdf({
       format: "A4",
@@ -57,10 +52,7 @@ app.post("/generate-pdf", async (req, res) => {
   } catch (err) {
     console.error("PDF GENERATION ERROR 👇");
     console.error(err);
-
-    res.status(500).json({
-      error: err.message || "Unknown PDF error"
-    });
+    res.status(500).json({ error: err.message });
   }
 });
 
