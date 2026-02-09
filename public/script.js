@@ -13,9 +13,10 @@ async function generatePDF() {
   });
 
   if (!response.ok) {
-    alert("Failed to generate PDF");
-    return;
-  }
+  const err = await response.json();
+  alert("PDF Error: " + err.error);
+  return;
+}
 
   const blob = await response.blob();
   const url = window.URL.createObjectURL(blob);
